@@ -3,11 +3,39 @@
 #include "kmeans.h"
 #include "dataset.h"
 
-dataset* initializeDataset(int size)
+dataset* initializeDataset(const int size)
 {
     dataset* myDataset = (dataset*) malloc(sizeof(dataset));
     myDataset->size = size;
     myDataset->points = (point*) malloc(myDataset->size * sizeof(point));
+    return myDataset;
+}
+
+dataset* datasetFromCSV(const char* name)
+{
+    FILE* f = fopen(name, "r");
+    int lines = 0;
+
+    if(!f)
+        return NULL;
+
+    for(char c = fgetc(f); c != EOF; c = fgetc(f))
+        if(c == '\n') lines++;
+
+    // This assumes the csv contains no empty lines nor header
+    dataset* myDataset = initializeDataset(lines);
+
+    rewind(f);
+    for(int i = 0; i<lines; i++)
+    {
+        char line[256];
+        while(fgets(line, 256, f))
+        {
+            char token;
+        }
+    }
+
+    fclose(f);
     return myDataset;
 }
 

@@ -26,4 +26,7 @@ typedef struct model
     cluster* clusters;
 }model;
 
+dataset* initializeDataset(const int size);
+dataset* datasetFromCSV(const char* filename);
+
 #endif

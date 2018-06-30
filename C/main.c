@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 {
     if(argc != 2)
     {
-        printf("Usage : kmeanspp cluster_size\n");
+        printf("Usage : kmeanspp dataset_file\n");
         return 0;
     }
 
