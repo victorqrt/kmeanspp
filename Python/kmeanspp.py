@@ -44,6 +44,7 @@ class Dataset:
                 if weight > max_weight:
                     max_weight = weight
                     best_candidate = p
+                    candidate_points.remove(p)
 
             current_center = best_candidate
             init_centers.append(current_center)
@@ -57,9 +58,10 @@ def datasetFromCSV(filename):
     with open(filename, 'r') as f:
         reader = csv.reader(f, delimiter=',')
         for e in reader:
-            points.append(Point(int(e[0]), int(e[1])))
+            if not any(p.x == int(e[0]) and p.y == int(e[1]) for p in points):
+                points.append(Point(int(e[0]), int(e[1])))
 
-    return Dataset(list(set(points)))
+    return Dataset(points)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:

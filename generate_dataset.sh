@@ -2,7 +2,7 @@
 
 rand()
 {
-    echo $((RANDOM % 100))
+    echo $((RANDOM % 1000))
 }
 
 SIZE=$1
