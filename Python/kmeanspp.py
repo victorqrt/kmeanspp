@@ -60,6 +60,13 @@ class Dataset:
                     c.points.append(p)
                     p.cluster = c
             c.center = barycenterFromList(c.points)
+<<<<<<< HEAD
+=======
+
+    def prt(self):
+        for p in self.points:
+            print(str(p) + ' -> ' + str(p.cluster.center))
+>>>>>>> 239af3fdfe0109c9c40f6acc99c33ae649605811
 
 def datasetFromCSV(filename):
     points =[]
@@ -71,7 +78,12 @@ def datasetFromCSV(filename):
 
     return Dataset(points)
 
+<<<<<<< HEAD
 barycenterFromList = lambda points : Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points)) 
+=======
+def barycenterFromList(points):
+    return Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points)) 
+>>>>>>> 239af3fdfe0109c9c40f6acc99c33ae649605811
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
