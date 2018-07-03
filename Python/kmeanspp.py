@@ -16,9 +16,9 @@ class Point:
         return str(self.x) + ' ' + str(self.y)
 
 class Cluster:
-    def __init__(self, center, points):
+    def __init__(self, center):
         self.center = center
-        self.points = points
+        self.points = []
         
 class Dataset:
     def __init__(self, points):
@@ -33,7 +33,7 @@ class Dataset:
             candidate_points = self.points[:]
             for p in init_centers:
                 for c in candidate_points:
-                    if p.x == p.y and c.x == c.y:
+                    if p.x == c.x and p.y == c.y:
                         candidate_points.remove(c)
            
             weight_dividor = sum(math.pow(p.distanceTo(current_center), 2) for p in candidate_points)
@@ -44,13 +44,25 @@ class Dataset:
                 if weight > max_weight:
                     max_weight = weight
                     best_candidate = p
-                    candidate_points.remove(p)
-
+            
             current_center = best_candidate
             init_centers.append(current_center)
         
         for c in init_centers:
+            self.clusters.append(Cluster(c))
             print(str(c))
+
+        for p in self.points:
+            self.clusters[0].points.append(p)
+            p.cluster = self.clusters[0]
+
+    def updateClustersMembers(self):
+        for p in self.points:
+            for c in self.clusters:
+                if p.distanceTo(c.center) < p.distanceTo(p.cluster.center):
+                    p.cluster.points.remove(p)
+                    c.points.append(p)
+                    p.cluster = c
          
 
 def datasetFromCSV(filename):
@@ -67,5 +79,11 @@ if __name__ == '__main__':
     if len(sys.argv) != 3:
         print("Usage:\n    kmeanspp.py number_of_clusters dataset_file")
     else:
+        print("[ ] Loading dataset...")
         dataset = datasetFromCSV(sys.argv[2])
+        print("[ ] Choosing initial cluster centers...")
         dataset.initializeCenters()
+        print("[ ] Updating clusters...")
+        dataset.updateClusters()
+
+        print("[+] Done.")
