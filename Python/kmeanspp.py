@@ -2,6 +2,7 @@ import sys
 import csv
 import math
 import random
+from copy import deepcopy
 
 class Point:
     def __init__(self, x, y):
@@ -9,11 +10,7 @@ class Point:
         self.y = y
         self.cluster = None
     
-    def distanceTo(self, p):
-        return math.sqrt(math.pow(self.x - p.x, 2) + math.pow(self.y - p.y, 2))
-
-    def __str__(self):
-        return str(self.x) + ' ' + str(self.y)
+    distanceTo = lambda self, p : math.sqrt(math.pow(self.x - p.x, 2) + math.pow(self.y - p.y, 2))
 
 class Cluster:
     def __init__(self, center):
@@ -50,20 +47,19 @@ class Dataset:
         
         for c in init_centers:
             self.clusters.append(Cluster(c))
-            print(str(c))
 
         for p in self.points:
             self.clusters[0].points.append(p)
             p.cluster = self.clusters[0]
 
-    def updateClustersMembers(self):
-        for p in self.points:
-            for c in self.clusters:
+    def updateClusterMembers(self):
+        for c in self.clusters:
+            for p in self.points:
                 if p.distanceTo(c.center) < p.distanceTo(p.cluster.center):
                     p.cluster.points.remove(p)
                     c.points.append(p)
                     p.cluster = c
-         
+            c.center = barycenterFromList(c.points)
 
 def datasetFromCSV(filename):
     points =[]
@@ -75,6 +71,8 @@ def datasetFromCSV(filename):
 
     return Dataset(points)
 
+barycenterFromList = lambda points : Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points)) 
+
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print("Usage:\n    kmeanspp.py number_of_clusters dataset_file")
@@ -83,7 +81,23 @@ if __name__ == '__main__':
         dataset = datasetFromCSV(sys.argv[2])
         print("[ ] Choosing initial cluster centers...")
         dataset.initializeCenters()
-        print("[ ] Updating clusters...")
-        dataset.updateClusters()
+        
+        centers = list(c.center for c in dataset.clusters)
+        previous_centers = [Point(-1, -1)]
+        i = 0
+        
+        while(any(c.x != p.x or c.y != p.y for (c, p) in zip(centers, previous_centers))):
+            print("[ ] Updating clusters (iteration " + str(i) + ")...")
+            previous_centers = deepcopy(centers)
+            dataset.updateClusterMembers()
+            centers = list(c.center for c in dataset.clusters)
+            i = i+1
+   
+        print("[ ] Clusters found, writing to out.csv...")
+        with(open('out.csv', 'w')) as out:
+            w = csv.writer(out)
+            for i in range(len(dataset.clusters)):
+                for p in dataset.clusters[i].points:
+                    w.writerow([p.x, p.y, i])
 
         print("[+] Done.")
