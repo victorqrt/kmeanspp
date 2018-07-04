@@ -94,10 +94,10 @@ if __name__ == '__main__':
             i = i+1
    
         print("[ ] Clusters found, writing to out.csv...")
-        with(open('out.csv', 'w')) as out:
+        with(open('out.csv', 'w', newline='')) as out:
             w = csv.writer(out)
             for i in range(len(dataset.clusters)):
                 for p in dataset.clusters[i].points:
-                    w.writerow([p.x, p.y, i])
+                    w.writerow([p.x, p.y, i, ''])
 
         print("[+] Done.")
