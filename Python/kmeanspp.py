@@ -1,15 +1,23 @@
+"""
+Usage:
+    kmeanspp.py generate_dataset <dataset_size>
+    kmeanspp.py clusterize <dataset> <number_of_clusters>
+    kmeanspp.py export
+"""
+
 import sys
 import csv
 import math
 import random
 from copy import deepcopy
+from docopt import docopt
 
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.cluster = None
-    
+
     distanceTo = lambda self, p : math.sqrt(math.pow(self.x - p.x, 2) + math.pow(self.y - p.y, 2))
 
 class Cluster:
@@ -22,11 +30,11 @@ class Dataset:
         self.points = points
         self.clusters = []
 
-    def initializeCenters(self):
+    def initializeCenters(self, n):
         init_centers = [random.choice(self.points)]
         current_center = init_centers[0]
         
-        for i in range(1, int(sys.argv[1])):
+        for i in range(1, n):
             candidate_points = self.points[:]
             for p in init_centers:
                 for c in candidate_points:
@@ -74,13 +82,22 @@ def datasetFromCSV(filename):
 barycenterFromList = lambda points : Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points)) 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage:\n    kmeanspp.py number_of_clusters dataset_file")
-    else:
+    args = docopt(__doc__)
+
+    if args["generate_dataset"]:
+        print("[ ] Generating " + args["<dataset_size>"] + " 2D points into dataset.csv...")
+        with(open("dataset.csv", 'w')) as out:
+            w = csv.writer(out)
+            for i in range(int(args["<dataset_size>"])):
+                w.writerow([random.randint(0, 1000), random.randint(0, 1000)])
+
+        print("[+] Done.")
+
+    elif args["clusterize"]:
         print("[ ] Loading dataset...")
-        dataset = datasetFromCSV(sys.argv[2])
+        dataset = datasetFromCSV(args["<dataset>"])
         print("[ ] Choosing initial cluster centers...")
-        dataset.initializeCenters()
+        dataset.initializeCenters(int(args["<number_of_clusters>"]))
         
         centers = list(c.center for c in dataset.clusters)
         previous_centers = [Point(-1, -1)]
@@ -94,10 +111,16 @@ if __name__ == '__main__':
             i = i+1
    
         print("[ ] Clusters found, writing to out.csv...")
-        with(open('out.csv', 'w', newline='')) as out:
+        with(open("out.csv", 'w', newline='')) as out:
             w = csv.writer(out)
             for i in range(len(dataset.clusters)):
                 for p in dataset.clusters[i].points:
                     w.writerow([p.x, p.y, i, ''])
 
         print("[+] Done.")
+
+    elif args["export"]:
+        print("[ ] Exporting points from out.csv to out.svg...")
+
+        print("[+] Done.")
+
