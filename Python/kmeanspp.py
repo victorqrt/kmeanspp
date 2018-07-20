@@ -115,12 +115,22 @@ if __name__ == '__main__':
             w = csv.writer(out)
             for i in range(len(dataset.clusters)):
                 for p in dataset.clusters[i].points:
-                    w.writerow([p.x, p.y, i, ''])
+                    w.writerow([p.x, p.y, str(i)])
 
         print("[+] Done.")
 
     elif args["export"]:
         print("[ ] Exporting points from out.csv to out.svg...")
+        svg_str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000">\n' 
+        svg_colors = ["black", "blue", "red", "green", "yellow", "gray", "gold", "tan", "olivedrab", "aqua"]
+
+        with open("out.csv", 'r') as f:
+            reader = csv.reader(f, delimiter=',')
+            for e in reader:
+                svg_str = svg_str + "   <circle cx='" + e[0] + "' cy='" + e[1] + "' r='5' fill='" + svg_colors[int(e[2]) % len(svg_colors)] + "' />\n"
+
+        svg_str = svg_str + "</svg>\n"
+        with open("out.svg", 'w') as out:
+            out.write(svg_str)
 
         print("[+] Done.")
-
