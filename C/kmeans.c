@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "kmeans.h"
 #include "dataset.h"
 
@@ -62,4 +63,27 @@ void displayDataset(dataset* data)
     printf("Dataset:\n");
     for(int i=0; i<data->size; i++)
             printf("\tPoint %d of %d: x=%d, y=%d\n", i+1, data->size, data->points[i].x, data->points[i].y);
+}
+
+char** split(char* const str, const char delimiter)
+{
+    // We know we're splitting 3 fields at most
+    #define len 3
+    char** splitted = malloc(len * sizeof(char*));
+    char* _str = strdup(str);
+    char* token;
+
+    for(int i = 0; i<len; i++)
+        while((token = strsep(&_str, delimiter)))
+            splitted[i] = token;
+
+    free(_str);    
+    return splitted;
+}
+
+void generate_dataset(int size)
+{
+    printf("[ ] Generating %d 2D points into dataset.csv...\n", size);
+
+    printf("[+] Done.\n");
 }
