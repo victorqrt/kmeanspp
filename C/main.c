@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "dataset.h"
 #include "kmeans.h"
 
@@ -18,17 +19,21 @@ int main(int argc, char** argv)
         if(strcmp(argv[1], "generate_dataset") == 0)
         {
             if(argc != 3)
-            {
                 usage();
-                return 1;
+            else
+            {
+                srand(time(NULL));
+                generate_dataset(atoi(argv[2]));
             }
-            
-            generate_dataset(atoi(argv[2]));
         }
         else if(strcmp(argv[1], "clusterize") == 0)
-            printf("clusterize");
+        {
+            dataset* myDataset = datasetFromCSV("dataset.csv");
+
+            free(myDataset);
+        }
         else if(strcmp(argv[1], "export") == 0)
-            printf("export");
+            export_csv();
         else
             usage();
     }

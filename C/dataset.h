@@ -19,13 +19,6 @@ typedef struct cluster
     point* points;
 }cluster;
 
-typedef struct model
-{
-    dataset data;
-    int numberOfClusters;
-    cluster* clusters;
-}model;
-
 dataset* initializeDataset(const int size);
 dataset* datasetFromCSV(const char* filename);
 
