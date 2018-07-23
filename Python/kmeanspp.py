@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     elif args["export"]:
         print("[ ] Exporting points from out.csv to out.svg...")
-        svg_str = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000">\n' 
+        svg_str = "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1000' height='1000'>\n"
         svg_colors = ["black", "blue", "red", "green", "yellow", "gray", "gold", "tan", "olivedrab", "aqua"]
 
         with open("out.csv", 'r') as f:
