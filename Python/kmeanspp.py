@@ -74,8 +74,7 @@ def datasetFromCSV(filename):
     with open(filename, 'r') as f:
         reader = csv.reader(f, delimiter=',')
         for e in reader:
-            if not any(p.x == int(e[0]) and p.y == int(e[1]) for p in points):
-                points.append(Point(int(e[0]), int(e[1])))
+            points.append(Point(int(e[0]), int(e[1])))
 
     return Dataset(points)
 
