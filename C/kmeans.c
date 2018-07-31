@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <stdbool.h>
 #include "kmeans.h"
 #include "dataset.h"
 
@@ -32,8 +34,9 @@ dataset* datasetFromCSV(const char* name)
         char line[256];
         fgets(line, 256, f);
         char** splitted_line = split(line, ',');
-        myDataset->points[i].x = atoi(splitted_line[0]);
-        myDataset->points[i].y = atoi(splitted_line[1]);
+        myDataset->points[i].x = atof(splitted_line[0]);
+        myDataset->points[i].y = atof(splitted_line[1]);
+        myDataset->points[i].cstr = NULL;
         free(splitted_line);
     }
     
@@ -62,7 +65,7 @@ char** split(char* const str, const char delimiter)
     return splitted;
 }
 
-void generate_dataset(int size)
+void generate_dataset(const int size)
 {
     printf("[ ] Generating %d 2D points into dataset.csv...\n", size);
 
@@ -103,9 +106,10 @@ void export_csv()
             char line[256];
             fgets(line, 256, f);
             char** splitted_line = split(line, ',');
-            myPoints[i].x = atoi(splitted_line[0]);
-            myPoints[i].y = atoi(splitted_line[1]);
+            myPoints[i].x = atof(splitted_line[0]);
+            myPoints[i].y = atof(splitted_line[1]);
             clusters[i] = atoi(splitted_line[2]);
+            free(splitted_line);
         }
 
         fclose(f);
@@ -120,11 +124,73 @@ void export_csv()
             fprintf(f, "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1000' height='1000'>\n");
 
             for(int i=0; i<lines; i++)
-                fprintf(f, "    <circle cx='%d' cy='%d' r='5' fill='%s' />\n", myPoints[i].x, myPoints[i].y, colors[clusters[i] % nb_colors]);
+                fprintf(f, "    <circle cx='%f' cy='%f' r='5' fill='%s' />\n", myPoints[i].x, myPoints[i].y, colors[clusters[i] % nb_colors]);
 
             fprintf(f, "</svg>\n");
             fclose(f);
             printf("[+] Done.\n");
         }
     }
+}
+
+double distance(const point p1, const point p2)
+{
+    return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+}
+
+point barycenterFromList(point* const point_list, const int size)
+{
+    double sx, sy = 0;
+    
+    for(int i=0; i<size; i++)
+    {
+        sx += point_list[i].x;
+        sy += point_list[i].y;
+    }
+
+    point p = { sx/size, sy/size, NULL};
+    return p;
+}
+
+cluster* initialize_clusters(dataset* const data, int c_nb)
+{
+    int rand_idx[c_nb];
+
+    for(int i=0; i<c_nb; i++)
+    { 
+        rand_idx[i] = rand() % data->size;
+        for(int j=0; j<i; j++) // We want unique indices
+        {
+            if(rand_idx[i] == rand_idx[j])
+            {
+                rand_idx[i] = rand() % data->size;
+                j = 0;
+            }
+        }
+    }
+   
+    int current_candidate_index = 0;
+    int nb_candidates = data->size - c_nb;
+    point* current_center = data->points + rand_idx[0];
+    point candidate_points[nb_candidates];
+    
+    for(int i=0; i<data->size; i++)
+    {
+        bool do_add = true;
+        for(int j=0; j<c_nb; j++)
+            if(data->points[rand_idx[j]].x == candidate_points[i].x && data->points[rand_idx[j]].y == candidate_points[i].y) do_add = false;
+
+        if(do_add)
+        {
+            candidate_points[current_candidate_index] = data->points[i];
+            current_candidate_index++;
+        }
+    }
+
+    double weight_dividor = 0;
+    
+    for(int i=0; i<nb_candidates; i++)
+        weight_dividor += pow(distance(candidate_points[i], /*TODO ^ */    ),2);
+
+    return NULL;
 }

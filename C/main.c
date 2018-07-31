@@ -28,8 +28,9 @@ int main(int argc, char** argv)
         }
         else if(strcmp(argv[1], "clusterize") == 0)
         {
+            srand(time(NULL));
             dataset* myDataset = datasetFromCSV("dataset.csv");
-
+            cluster* c = initialize_clusters(myDataset, 4);
             free(myDataset);
         }
         else if(strcmp(argv[1], "export") == 0)

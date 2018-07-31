@@ -1,4 +1,4 @@
 all:
-	true
+	chmod +x kmeanspp.sh
 
 clean: all

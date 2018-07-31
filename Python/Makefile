@@ -1,4 +1,4 @@
 all:
-	true
+	chmod +x kmeanspp.py
 
 clean: all
