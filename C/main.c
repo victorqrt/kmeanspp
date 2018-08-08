@@ -30,7 +30,8 @@ int main(int argc, char** argv)
         {
             srand(time(NULL));
             dataset* myDataset = datasetFromCSV("dataset.csv");
-            cluster* c = initialize_clusters(myDataset, 4);
+            cluster* c = initialize_clusters(myDataset, 2);
+            free(c);
             free(myDataset);
         }
         else if(strcmp(argv[1], "export") == 0)

@@ -14,13 +14,13 @@ typedef struct dataset
 {
     int size;
     point* points;
-    point center;
 }dataset;
 
 typedef struct cluster
 {
     int size;
     point* points;
+    point center;
 }cluster;
 
 dataset* initializeDataset(const int size);

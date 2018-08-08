@@ -119,12 +119,11 @@ void export_csv()
             printf("[!] File error\n");
         else
         {
-            #define nb_colors 10
             char* colors[] = {"black", "blue", "red", "green", "yellow", "gray", "gold", "tan", "olivedrab", "aqua"};
             fprintf(f, "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1000' height='1000'>\n");
 
             for(int i=0; i<lines; i++)
-                fprintf(f, "    <circle cx='%f' cy='%f' r='5' fill='%s' />\n", myPoints[i].x, myPoints[i].y, colors[clusters[i] % nb_colors]);
+                fprintf(f, "    <circle cx='%f' cy='%f' r='5' fill='%s' />\n", myPoints[i].x, myPoints[i].y, colors[clusters[i] % 10]);
 
             fprintf(f, "</svg>\n");
             fclose(f);
@@ -168,29 +167,55 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
             }
         }
     }
-   
-    int current_candidate_index = 0;
-    int nb_candidates = data->size - c_nb;
+        
     point* current_center = data->points + rand_idx[0];
-    point candidate_points[nb_candidates];
-    
-    for(int i=0; i<data->size; i++)
+    cluster* cluster_list = malloc(c_nb * sizeof(cluster));
+  
+    for(int c=0; c<c_nb; c++)
     {
-        bool do_add = true;
-        for(int j=0; j<c_nb; j++)
-            if(data->points[rand_idx[j]].x == candidate_points[i].x && data->points[rand_idx[j]].y == candidate_points[i].y) do_add = false;
-
-        if(do_add)
+        int nb_candidates = data->size - c_nb;
+        int current_candidate_index = 0;
+        point* candidate_points[nb_candidates];
+    
+        for(int i=0; i<data->size; i++)
         {
-            candidate_points[current_candidate_index] = data->points[i];
-            current_candidate_index++;
+            bool do_add = true;
+            for(int j=0; j<c_nb; j++)
+            {
+                for(int k=0; k<current_candidate_index; k++)
+                    if(data->points[rand_idx[j]].x == candidate_points[k]->x && data->points[rand_idx[j]].y == candidate_points[k]->y) do_add = false;
+            }
+
+            if(do_add)
+            {
+                candidate_points[current_candidate_index] = data->points + i;
+                current_candidate_index++;
+            }
         }
+
+        double weight_dividor = 0;
+        printf("%d, %d\n", nb_candidates, current_candidate_index);
+    
+        for(int i=0; i<nb_candidates; i++)
+            weight_dividor += pow(distance(*candidate_points[i], *current_center), 2);
+
+        double max_weight = 0;
+        point* best_candidate = NULL;
+
+        for(int i=0; i<nb_candidates; i++)
+        {
+            double weight = pow(distance(*candidate_points[i], *current_center), 2);
+            if(weight > max_weight)
+            {
+                max_weight = weight;
+                best_candidate = candidate_points[i];
+            }
+        }
+
+        current_center = best_candidate;
+        cluster_list[c] = (cluster) {0, NULL, *current_center};
+
     }
 
-    double weight_dividor = 0;
-    
-    for(int i=0; i<nb_candidates; i++)
-        weight_dividor += pow(distance(candidate_points[i], /*TODO ^ */    ),2);
-
-    return NULL;
+    return cluster_list;
 }
