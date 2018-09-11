@@ -67,7 +67,8 @@ class Dataset:
                     p.cluster.points.remove(p)
                     c.points.append(p)
                     p.cluster = c
-            c.center = barycenterFromList(c.points)
+            if len(c.points) > 0:
+                c.center = barycenterFromList(c.points)
 
 def datasetFromCSV(filename):
     points =[]
@@ -95,26 +96,31 @@ if __name__ == '__main__':
     elif args["clusterize"]:
         print("[ ] Loading dataset...")
         dataset = datasetFromCSV(args["<dataset>"])
-        print("[ ] Choosing initial cluster centers...")
-        dataset.initializeCenters(int(args["<number_of_clusters>"]))
         
-        centers = list(c.center for c in dataset.clusters)
-        previous_centers = [Point(-1, -1)]
-        i = 0
+        n = int(args["<number_of_clusters>"])
+        if n > len(dataset.points):
+            print("[!] Error: we are looking for more clusters than points in the dataset")
+        else:
+            print("[ ] Choosing initial cluster centers...")
+            dataset.initializeCenters(n)
         
-        while(any(c.x != p.x or c.y != p.y for (c, p) in zip(centers, previous_centers))):
-            print("[ ] Updating clusters (iteration " + str(i) + ")...")
-            previous_centers = deepcopy(centers)
-            dataset.updateClusterMembers()
             centers = list(c.center for c in dataset.clusters)
-            i = i+1
+            previous_centers = [Point(-1, -1)]
+            i = 0
+        
+            while(any(c.x != p.x or c.y != p.y for (c, p) in zip(centers, previous_centers))):
+                print("[ ] Updating clusters (iteration " + str(i) + ")...")
+                previous_centers = deepcopy(centers)
+                dataset.updateClusterMembers()
+                centers = list(c.center for c in dataset.clusters)
+                i = i+1
    
-        print("[ ] Clusters found, writing to out.csv...")
-        with(open("out.csv", 'w', newline='')) as out:
-            w = csv.writer(out)
-            for i in range(len(dataset.clusters)):
-                for p in dataset.clusters[i].points:
-                    w.writerow([p.x, p.y, str(i)])
+            print("[ ] Clusters found, writing to out.csv...")
+            with(open("out.csv", 'w', newline='')) as out:
+                w = csv.writer(out)
+                for i in range(len(dataset.clusters)):
+                    for p in dataset.clusters[i].points:
+                        w.writerow([p.x, p.y, str(i)])
 
         print("[+] Done.")
 
