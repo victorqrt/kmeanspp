@@ -99,7 +99,7 @@ if __name__ == '__main__':
         
         n = int(args["<number_of_clusters>"])
         if n > len(dataset.points):
-            print("[!] Error: we are looking for more clusters than points in the dataset")
+            print("[!] Error: we are looking for more clusters than there are points in the dataset")
         else:
             print("[ ] Choosing initial cluster centers...")
             dataset.initializeCenters(n)
