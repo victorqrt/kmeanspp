@@ -56,7 +56,6 @@ char** split(char* const str, const char delimiter)
     #define len 3
     char** splitted = malloc(len * sizeof(char*));
     char* _str = strdup(str);
-    char* token;
 
     for(int i = 0; i<len; i++)
         splitted[i] = strsep(&_str, &delimiter);
@@ -153,6 +152,12 @@ point barycenterFromList(point* const point_list, const int size)
 
 cluster* initialize_clusters(dataset* const data, int c_nb)
 {
+    if(data->size < c_nb)
+    {
+        printf("[!] Error: we are looking for more clusters than there are points in the dataset\n");
+        return NULL;
+    }
+
     int rand_idx[c_nb];
 
     for(int i=0; i<c_nb; i++)
@@ -167,23 +172,23 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
             }
         }
     }
-        
+    
     point* current_center = data->points + rand_idx[0];
     cluster* cluster_list = malloc(c_nb * sizeof(cluster));
-  
+ 
     for(int c=0; c<c_nb; c++)
     {
         int nb_candidates = data->size - c_nb;
         int current_candidate_index = 0;
         point* candidate_points[nb_candidates];
-    
+ 
         for(int i=0; i<data->size; i++)
         {
             bool do_add = true;
             for(int j=0; j<c_nb; j++)
             {
                 for(int k=0; k<current_candidate_index; k++)
-                    if(data->points[rand_idx[j]].x == candidate_points[k]->x && data->points[rand_idx[j]].y == candidate_points[k]->y) do_add = false;
+                    if(data->points + rand_idx[j] == candidate_points[k]) do_add = false; 
             }
 
             if(do_add)
@@ -194,8 +199,7 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
         }
 
         double weight_dividor = 0;
-        printf("%d, %d\n", nb_candidates, current_candidate_index);
-    
+ 
         for(int i=0; i<nb_candidates; i++)
             weight_dividor += pow(distance(*candidate_points[i], *current_center), 2);
 
@@ -204,7 +208,7 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
 
         for(int i=0; i<nb_candidates; i++)
         {
-            double weight = pow(distance(*candidate_points[i], *current_center), 2);
+            double weight = pow(distance(*candidate_points[i], *current_center), 2) / weight_dividor;
             if(weight > max_weight)
             {
                 max_weight = weight;
@@ -212,10 +216,10 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
             }
         }
 
+        printf("%f, %f - candidate for cluster %d\n", best_candidate->x, best_candidate->y, c);
         current_center = best_candidate;
         cluster_list[c] = (cluster) {0, NULL, *current_center};
-
     }
-
+    
     return cluster_list;
 }

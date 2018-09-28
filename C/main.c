@@ -16,21 +16,16 @@ int main(int argc, char** argv)
         usage();
     else
     {
-        if(strcmp(argv[1], "generate_dataset") == 0)
-        {
-            if(argc != 3)
-                usage();
-            else
-            {
-                srand(time(NULL));
-                generate_dataset(atoi(argv[2]));
-            }
-        }
-        else if(strcmp(argv[1], "clusterize") == 0)
+        if(strcmp(argv[1], "generate_dataset") == 0 && argc == 3)
         {
             srand(time(NULL));
-            dataset* myDataset = datasetFromCSV("dataset.csv");
-            cluster* c = initialize_clusters(myDataset, 2);
+            generate_dataset(atoi(argv[2]));
+        }
+        else if(strcmp(argv[1], "clusterize") == 0 && argc == 4)
+        {
+            srand(time(NULL));
+            dataset* myDataset = datasetFromCSV(argv[2]);
+            cluster* c = initialize_clusters(myDataset, atoi(argv[3]));
             free(c);
             free(myDataset);
         }

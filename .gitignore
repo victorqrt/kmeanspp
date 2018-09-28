@@ -1,0 +1,4 @@
+*.un~
+*.csv
+*.svg
+Rust/Cargo.lock
