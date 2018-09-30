@@ -1,4 +1,5 @@
 *.un~
 *.csv
 *.svg
+*.swp
 Rust/Cargo.lock
