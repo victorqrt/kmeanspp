@@ -3,3 +3,4 @@
 *.svg
 *.swp
 Rust/Cargo.lock
+Rust/target/*

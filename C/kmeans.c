@@ -6,16 +6,14 @@
 #include "kmeans.h"
 #include "dataset.h"
 
-dataset* initializeDataset(const int size)
-{
+dataset* initialize_dataset(const int size) {
     dataset* myDataset = (dataset*) malloc(sizeof(dataset));
     myDataset->size = size;
     myDataset->points = (point*) malloc(myDataset->size * sizeof(point));
     return myDataset;
 }
 
-dataset* datasetFromCSV(const char* name)
-{
+dataset* dataset_from_csv(const char* name) {
     FILE* f = fopen(name, "r");
     int lines = 0;
 
@@ -26,11 +24,10 @@ dataset* datasetFromCSV(const char* name)
         if(c == '\n') lines++;
 
     // This assumes the csv contains no empty lines nor header
-    dataset* myDataset = initializeDataset(lines);
+    dataset* myDataset = initialize_dataset(lines);
 
     rewind(f);
-    for(int i = 0; i<lines; i++)
-    {
+    for(int i = 0; i<lines; i++) {
         char line[256];
         fgets(line, 256, f);
         char** splitted_line = split(line, ',');
@@ -39,19 +36,17 @@ dataset* datasetFromCSV(const char* name)
         myDataset->points[i].cstr = NULL;
         free(splitted_line);
     }
-    
+
     fclose(f);
     return myDataset;
 }
 
-void freeDataset(dataset* myDataset)
-{
+void free_dataset(dataset* myDataset) {
     free(myDataset->points);
     free(myDataset);
 }
 
-char** split(char* const str, const char delimiter)
-{
+char** split(char* const str, const char delimiter) {
     // We know we're splitting 3 fields at most
     #define len 3
     char** splitted = malloc(len * sizeof(char*));
@@ -60,20 +55,18 @@ char** split(char* const str, const char delimiter)
     for(int i = 0; i<len; i++)
         splitted[i] = strsep(&_str, &delimiter);
 
-    free(_str);    
+    free(_str);
     return splitted;
 }
 
-void generate_dataset(const int size)
-{
+void generate_dataset(const int size) {
     printf("[ ] Generating %d 2D points into dataset.csv...\n", size);
 
     FILE* f = fopen("dataset.csv", "w");
-    
+
     if(!f)
         printf("[!] File error\n");
-    else
-    {
+    else {
         for(int i=0; i<size; i++)
             fprintf(f, "%d,%d\n", rand() % 1000, rand() % 1000);
 
@@ -82,26 +75,23 @@ void generate_dataset(const int size)
     }
 }
 
-void export_csv()
-{
+void export_csv() {
     printf("[ ] Exporting points from out.csv to out.svg...\n");
-    
+
     FILE* f = fopen("out.csv", "r");
-    
+
     if(!f)
         printf("[!] File error\n");
-    else
-    {
+    else {
         int lines = 0;
         for(char c = fgetc(f); c != EOF; c = fgetc(f))
             if(c == '\n') lines++;
         rewind(f);
-       
+
         point myPoints[lines];
         int clusters[lines];
 
-        for(int i=0; i<lines; i++)
-        {
+        for(int i=0; i<lines; i++) {
             char line[256];
             fgets(line, 256, f);
             char** splitted_line = split(line, ',');
@@ -113,11 +103,10 @@ void export_csv()
 
         fclose(f);
         f = fopen("out.svg", "w+");
-        
+
         if(!f)
             printf("[!] File error\n");
-        else
-        {
+        else {
             char* colors[] = {"black", "blue", "red", "green", "yellow", "gray", "gold", "tan", "olivedrab", "aqua"};
             fprintf(f, "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='1000' height='1000'>\n");
 
@@ -131,17 +120,14 @@ void export_csv()
     }
 }
 
-double distance(const point p1, const point p2)
-{
+double distance(const point p1, const point p2) {
     return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }
 
-point barycenterFromList(point* const point_list, const int size)
-{
+point barycenter_from_list(point* const point_list, const int size) {
     double sx, sy = 0;
-    
-    for(int i=0; i<size; i++)
-    {
+
+    for(int i=0; i<size; i++) {
         sx += point_list[i].x;
         sy += point_list[i].y;
     }
@@ -150,67 +136,93 @@ point barycenterFromList(point* const point_list, const int size)
     return p;
 }
 
-cluster* initialize_clusters(dataset* const data, int c_nb)
-{
-    if(data->size < c_nb)
-    {
+void add_point_to_cluster(point* p, cluster* c) {
+    point_llist* current_p = c->points;
+    while(current_p && current_p->next)
+        current_p = current_p->next;
+
+    if(current_p) {
+        current_p->next = malloc(sizeof(point_llist));
+        current_p->next->p = p;
+        current_p->next->next = NULL;
+    }
+    else {
+        current_p = malloc(sizeof(point_llist));
+        current_p->p = p;
+        current_p->next = NULL;
+        c->points = current_p;
+    }
+
+    c->size++;
+}
+
+void free_cluster(cluster* c) {
+
+    void free_pllist(point_llist* p) {
+        if(p) {
+            if(p->next)
+                free_pllist(p->next);
+            free(p);
+        }
+    }
+
+    free_pllist(c->points);
+    free(c);
+}
+
+cluster* initialize_clusters(dataset* const data, int c_nb) {
+    if(data->size < c_nb) {
         printf("[!] Error: we are looking for more clusters than there are points in the dataset\n");
         return NULL;
     }
 
     int rand_idx[c_nb];
 
-    for(int i=0; i<c_nb; i++)
-    { 
+    for(int i=0; i<c_nb; i++) {
         rand_idx[i] = rand() % data->size;
-        for(int j=0; j<i; j++) // We want unique indices
-        {
-            if(rand_idx[i] == rand_idx[j])
-            {
+
+        for(int j=0; j<i; j++) { // We want unique indices
+            if(rand_idx[i] == rand_idx[j]) {
                 rand_idx[i] = rand() % data->size;
                 j = 0;
             }
         }
     }
-    
-    point* current_center = data->points + rand_idx[0];
+
     cluster* cluster_list = malloc(c_nb * sizeof(cluster));
- 
-    for(int c=0; c<c_nb; c++)
-    {
+/*
+    point* current_center = data->points + rand_idx[0];
+    for(int c=0; c<c_nb; c++) {
         int nb_candidates = data->size - c_nb;
         int current_candidate_index = 0;
         point* candidate_points[nb_candidates];
- 
-        for(int i=0; i<data->size; i++)
-        {
+
+        for(int i=0; i<data->size; i++) {
             bool do_add = true;
-            for(int j=0; j<c_nb; j++)
-            {
+
+            for(int j=0; j<c_nb; j++) {
                 for(int k=0; k<current_candidate_index; k++)
-                    if(data->points + rand_idx[j] == candidate_points[k]) do_add = false; 
+                    if(data->points + rand_idx[j] == candidate_points[k]) do_add = false;
             }
 
-            if(do_add)
-            {
+            if(do_add) {
                 candidate_points[current_candidate_index] = data->points + i;
                 current_candidate_index++;
             }
         }
 
         double weight_dividor = 0;
- 
+
         for(int i=0; i<nb_candidates; i++)
             weight_dividor += pow(distance(*candidate_points[i], *current_center), 2);
 
         double max_weight = 0;
         point* best_candidate = NULL;
 
-        for(int i=0; i<nb_candidates; i++)
-        {
+        for(int i=0; i<nb_candidates; i++) {
             double weight = pow(distance(*candidate_points[i], *current_center), 2) / weight_dividor;
-            if(weight > max_weight)
-            {
+
+            if(weight > max_weight) {
                 max_weight = weight;
                 best_candidate = candidate_points[i];
             }
@@ -220,6 +232,24 @@ cluster* initialize_clusters(dataset* const data, int c_nb)
         current_center = best_candidate;
         cluster_list[c] = (cluster) {0, NULL, *current_center};
     }
-    
+*/
+
+    // Random initialization for now. Above (unfinished) code aims at better choosing initial centers,
+    // putting the ++ in kmeans.
+
+    for(int i=0; i<c_nb; i++) {
+        cluster_list[i] = (cluster) {0, NULL, data->points[rand_idx[i]]};
+    }
+
+    for(int i=0; i<data->size; i++) {
+        cluster* best_cluster = cluster_list;
+        for(int j=0; j<c_nb; j++) {
+            if(distance(cluster_list[j].center, data->points[i]) < distance(best_cluster->center, data->points[i]))
+                best_cluster = cluster_list + j;
+        }
+
+        add_point_to_cluster(data->points + i, best_cluster);
+    }
+
     return cluster_list;
 }

@@ -3,27 +3,31 @@
 
 struct cluster;
 
-typedef struct point
-{
+typedef struct point {
     double x;
     double y;
     struct cluster* cstr;
-}point;
+} point;
 
-typedef struct dataset
-{
+typedef struct point_llist {
+    point* p;
+    struct point_llist* next;
+} point_llist;
+
+typedef struct dataset {
     int size;
     point* points;
-}dataset;
+} dataset;
 
-typedef struct cluster
-{
+typedef struct cluster {
     int size;
-    point* points;
+    point_llist* points;
     point center;
-}cluster;
+} cluster;
 
-dataset* initializeDataset(const int size);
-dataset* datasetFromCSV(const char* filename);
+dataset* initialize_dataset(const int size);
+dataset* dataset_from_csv(const char* filename);
+void add_point_to_cluster(point* p, cluster* c);
+void free_cluster(cluster* c);
 
 #endif

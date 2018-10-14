@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 Usage:
     kmeanspp.py generate_dataset <dataset_size>
@@ -24,7 +26,7 @@ class Cluster:
     def __init__(self, center):
         self.center = center
         self.points = []
-        
+
 class Dataset:
     def __init__(self, points):
         self.points = points
@@ -33,14 +35,14 @@ class Dataset:
     def initializeCenters(self, n):
         init_centers = [random.choice(self.points)]
         current_center = init_centers[0]
-        
+
         for i in range(1, n):
             candidate_points = self.points[:]
             for p in init_centers:
                 for c in candidate_points:
                     if p.x == c.x and p.y == c.y:
                         candidate_points.remove(c)
-           
+
             weight_dividor = sum(math.pow(p.distanceTo(current_center), 2) for p in candidate_points)
             max_weight = 0
             best_candidate = None
@@ -49,10 +51,10 @@ class Dataset:
                 if weight > max_weight:
                     max_weight = weight
                     best_candidate = p
-            
+
             current_center = best_candidate
             init_centers.append(current_center)
-        
+
         for c in init_centers:
             self.clusters.append(Cluster(c))
 
@@ -79,7 +81,7 @@ def datasetFromCSV(filename):
 
     return Dataset(points)
 
-barycenterFromList = lambda points : Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points)) 
+barycenterFromList = lambda points : Point(sum(p.x for p in points) / len(points), sum(p.y for p in points) / len(points))
 
 if __name__ == '__main__':
     args = docopt(__doc__)
@@ -96,25 +98,25 @@ if __name__ == '__main__':
     elif args["clusterize"]:
         print("[ ] Loading dataset...")
         dataset = datasetFromCSV(args["<dataset>"])
-        
+
         n = int(args["<number_of_clusters>"])
         if n > len(dataset.points):
             print("[!] Error: we are looking for more clusters than there are points in the dataset")
         else:
             print("[ ] Choosing initial cluster centers...")
             dataset.initializeCenters(n)
-        
+
             centers = list(c.center for c in dataset.clusters)
             previous_centers = [Point(-1, -1)]
             i = 0
-        
+
             while(any(c.x != p.x or c.y != p.y for (c, p) in zip(centers, previous_centers))):
                 print("[ ] Updating clusters (iteration " + str(i) + ")...")
                 previous_centers = deepcopy(centers)
                 dataset.updateClusterMembers()
                 centers = list(c.center for c in dataset.clusters)
                 i = i+1
-   
+
             print("[ ] Clusters found, writing to out.csv...")
             with(open("out.csv", 'w', newline='')) as out:
                 w = csv.writer(out)
