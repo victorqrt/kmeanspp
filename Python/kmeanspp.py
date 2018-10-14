@@ -7,10 +7,7 @@ Usage:
     kmeanspp.py export
 """
 
-import sys
-import csv
-import math
-import random
+import sys, csv, math, random
 from copy import deepcopy
 from docopt import docopt
 
