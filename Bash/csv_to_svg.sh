@@ -3,8 +3,7 @@
 OUT='out.svg'
 SVG_COLORS=('black' 'blue' 'red' 'green' 'yellow' 'gray' 'gold' 'tan' 'olivedrab' 'aqua')
 
-getPointMarkup()
-{  
+function getPointMarkup {
     COLOR=${SVG_COLORS[$3]}
     echo '    <circle cx="'$1'" cy="'$2'" r="5" fill="'$COLOR'" />'
 }

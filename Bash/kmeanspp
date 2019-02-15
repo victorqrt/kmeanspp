@@ -1,0 +1,44 @@
+#!/bin/bash
+
+function usage {
+    printf "Usage:\n    $0 generate_dataset <dataset_size>\n    $0 clusterize <dataset> <number_of_clusters>\n    $0 export\n"
+}
+
+function rand {
+    echo $((RANDOM % $1))
+}
+
+function generate_dataset {
+    LIMIT=$2
+    echo "[ ] Generating "$1" 2D points into dataset.csv..."
+
+    for((i=0; i<$1; i++)); do
+        echo $(rand $LIMIT),$(rand $LIMIT) >> dataset.csv
+    done
+    echo "[+] Done."
+}
+
+SVG_COLORS=('black' 'blue' 'red' 'green' 'yellow' 'gray' 'gold' 'tan' 'olivedrab' 'aqua')
+
+function get_point_markup {
+    COLOR=${SVG_COLORS[$1]}
+    echo '    <circle cx="'$1'" cy="'$2'" r="5" fill="'$COLOR'" />'
+}
+
+function export_to_csv {
+    echo '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000">' > out.svg
+
+    while read -r line || [[ -n "$line" ]]; do
+        X=$(echo $line | cut -d, -f1)
+        Y=$(echo $line | cut -d, -f2)
+        C=$(echo $line | cut -d, -f3)
+        getPointMarkup $X $Y $C >> out.svg
+    done < "$1"
+
+    echo '</svg>' >> out.svg
+}
+
+case $1 in
+    generate_dataset) generate_dataset $2 1000;;
+    *) usage;;
+esac

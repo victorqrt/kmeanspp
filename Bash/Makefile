@@ -1,2 +1,5 @@
 all:
-	chmod +x kmeanspp.sh
+	chmod +x kmeanspp
+
+clean:
+	chmod -x kmeanspp

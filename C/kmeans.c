@@ -13,6 +13,8 @@ dataset* initialize_dataset(const int size) {
     return myDataset;
 }
 
+#define _getline_or_die(line, fd) if(!fgets(line, 256, fd)) {printf("[!] File error\n"); exit(EXIT_FAILURE);}
+
 dataset* dataset_from_csv(const char* name) {
     FILE* f = fopen(name, "r");
     int lines = 0;
@@ -29,7 +31,9 @@ dataset* dataset_from_csv(const char* name) {
     rewind(f);
     for(int i = 0; i<lines; i++) {
         char line[256];
-        fgets(line, 256, f);
+
+        _getline_or_die(line, f)
+
         char** splitted_line = split(line, ',');
         myDataset->points[i].x = atof(splitted_line[0]);
         myDataset->points[i].y = atof(splitted_line[1]);
@@ -68,7 +72,7 @@ void generate_dataset(const int size) {
         printf("[!] File error\n");
     else {
         for(int i=0; i<size; i++)
-            fprintf(f, "%d,%d\n", rand() % 1000, rand() % 1000);
+            fprintf(f, "%d,%d\n", rand() % 1000, rand() % 100);
 
         fclose(f);
         printf("[+] Done.\n");
@@ -93,7 +97,9 @@ void export_csv() {
 
         for(int i=0; i<lines; i++) {
             char line[256];
-            fgets(line, 256, f);
+
+            _getline_or_die(line, f)
+
             char** splitted_line = split(line, ',');
             myPoints[i].x = atof(splitted_line[0]);
             myPoints[i].y = atof(splitted_line[1]);
@@ -125,7 +131,8 @@ double distance(const point p1, const point p2) {
 }
 
 point barycenter_from_list(point* const point_list, const int size) {
-    double sx, sy = 0;
+    double sx, sy;
+    sx = sy = 0;
 
     for(int i=0; i<size; i++) {
         sx += point_list[i].x;
@@ -154,6 +161,15 @@ void add_point_to_cluster(point* p, cluster* c) {
     }
 
     c->size++;
+    p->cstr = c;
+}
+
+void del_point_from_cluster_llist(point_llist* list, point_llist* p) {
+
+    for(point_llist** ref = &list; *ref; ref = &(*ref)->next) {
+        if(*ref == p)
+            *ref = (*ref)->next;
+    }
 }
 
 void free_cluster(cluster* c) {
@@ -171,6 +187,7 @@ void free_cluster(cluster* c) {
 }
 
 cluster* initialize_clusters(dataset* const data, int c_nb) {
+
     if(data->size < c_nb) {
         printf("[!] Error: we are looking for more clusters than there are points in the dataset\n");
         return NULL;
@@ -239,6 +256,7 @@ cluster* initialize_clusters(dataset* const data, int c_nb) {
 
     for(int i=0; i<c_nb; i++) {
         cluster_list[i] = (cluster) {0, NULL, data->points[rand_idx[i]]};
+        cluster_list[i].center.cstr = cluster_list + i;
     }
 
     for(int i=0; i<data->size; i++) {
@@ -252,4 +270,25 @@ cluster* initialize_clusters(dataset* const data, int c_nb) {
     }
 
     return cluster_list;
+}
+
+bool update_clusters(dataset* const data, cluster* clusters, int c_nb) {
+    bool modified = false;
+
+    for(int i=0; i<c_nb; i++) {
+        for(int j=0; j<data->size; j++) {
+
+            printf("%f, %f\n", distance(clusters[i].center, data->points[j]), distance(data->points[j].cstr->center, data->points[j]));
+
+            // TODO
+            /*if(distance(clusters[i].center, *(p->p)) < distance(p->p->cstr->center, *(p->p))) {
+                del_point_from_cluster_llist(clusters[i].points, p);
+                add_point_to_cluster(p->p, clusters + i);
+                modified = true;
+            }*/
+
+        }
+    }
+
+    return modified;
 }
