@@ -4,7 +4,6 @@
 #include <math.h>
 #include <stdbool.h>
 #include "kmeans.h"
-#include "dataset.h"
 
 dataset* initialize_dataset(const int size) {
     dataset* myDataset = (dataset*) malloc(sizeof(dataset));
@@ -164,10 +163,10 @@ void add_point_to_cluster(point* p, cluster* c) {
     p->cstr = c;
 }
 
-void del_point_from_cluster_llist(point_llist* list, point_llist* p) {
-
+void del_point_from_cluster_llist(point_llist* list, point* p) {
+    // Deletes a point from a linked list, by reference
     for(point_llist** ref = &list; *ref; ref = &(*ref)->next) {
-        if(*ref == p)
+        if((*ref)->p == p)
             *ref = (*ref)->next;
     }
 }
@@ -272,22 +271,39 @@ cluster* initialize_clusters(dataset* const data, int c_nb) {
     return cluster_list;
 }
 
-bool update_clusters(dataset* const data, cluster* clusters, int c_nb) {
+int cluster_size(cluster c) {
+    int s = 0;
+    for(point_llist* p = c.points; p; p = p->next, s++);
+    return s;
+}
+
+point cluster_barycenter(cluster c) {
+    point plist[c.size];
+
+    int i = 0;
+    for(point_llist* p = c.points; p; p = p->next, i++)
+        plist[i] = *(p->p);
+
+    return barycenter_from_list(plist, c.size);
+}
+
+bool update_clusters(dataset const data, cluster* clusters, int c_nb) {
     bool modified = false;
 
     for(int i=0; i<c_nb; i++) {
-        for(int j=0; j<data->size; j++) {
 
-            printf("%f, %f\n", distance(clusters[i].center, data->points[j]), distance(data->points[j].cstr->center, data->points[j]));
+        clusters[i].center = cluster_barycenter(clusters[i]);
 
-            // TODO
-            /*if(distance(clusters[i].center, *(p->p)) < distance(p->p->cstr->center, *(p->p))) {
-                del_point_from_cluster_llist(clusters[i].points, p);
-                add_point_to_cluster(p->p, clusters + i);
+        for(int j=0; j<data.size; j++) {
+
+            if(distance(clusters[i].center, data.points[j]) < distance(data.points[j].cstr->center, data.points[j])) {
+                del_point_from_cluster_llist(data.points[j].cstr->points, data.points + j);
+                add_point_to_cluster(data.points + j, clusters + i);
                 modified = true;
-            }*/
-
+            }
         }
+
+        clusters[i].size = cluster_size(clusters[i]);
     }
 
     return modified;
