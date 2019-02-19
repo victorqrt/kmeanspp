@@ -11,3 +11,7 @@ It is a constant work in progress, as part of my learning process of said langua
 - C: gcc.
 - Rust: cargo.
 - Scala: sbt.
+
+# Draw dataset
+
+The program can generate random datasets, but you can generate one by hand with the `draw-dataset` included tool. Requires python3-tk.

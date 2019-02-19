@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+from tkinter import Tk, Canvas, Button
+from tkinter.messagebox import showinfo
+
+def create_draw_window():
+    window = Tk()
+
+    canvas = Canvas(window, width=1000, height=1000, background="white")
+    canvas.bind("<Button-1>", lambda event: canvas_click(event, canvas))
+    canvas.grid(row=0, column=0)
+
+    Button(window, text="Write dataset", command=lambda: write_dataset(canvas)).grid(row=0, column=1)
+    Button(window, text="Quit", command=window.quit).grid(row=0, column=2)
+
+    return window
+
+def canvas_click(event, canvas):
+    x = canvas.canvasx(event.x)
+    y = canvas.canvasx(event.y)
+    canvas.create_oval(x - 2, y - 2, x + 2, y + 2, fill="black")
+
+def write_dataset(canvas):
+    points = list(filter(
+        lambda p: p[0] in range(0, 1000) and p[1] in range(0, 1000),
+        map(
+            lambda e: [int(canvas.coords(e)[0] + 2), int(canvas.coords(e)[1] + 2)],
+            canvas.find_all()
+        )
+    ))
+
+    with open("dataset.csv", "w+") as csv:
+        for p in points:
+            csv.write("{},{}\n".format(p[0], p[1]))
+
+    showinfo("draw-dataset", "Saved dataset.csv.")
+
+if __name__ == "__main__":
+    create_draw_window().mainloop()
