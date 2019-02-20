@@ -15,6 +15,8 @@ dataset* initialize_dataset(const int size) {
 #define _getline_or_die(line, fd) if(!fgets(line, 256, fd)) {printf("[!] File error\n"); exit(EXIT_FAILURE);}
 
 dataset* dataset_from_csv(const char* name) {
+    printf("[ ] Loading dataset...\n");
+
     FILE* f = fopen(name, "r");
     int lines = 0;
 
@@ -71,14 +73,28 @@ void generate_dataset(const int size) {
         printf("[!] File error\n");
     else {
         for(int i=0; i<size; i++)
-            fprintf(f, "%d,%d\n", rand() % 1000, rand() % 100);
+            fprintf(f, "%d,%d\n", rand() % 1000, rand() % 1000);
 
         fclose(f);
         printf("[+] Done.\n");
     }
 }
 
-void export_csv() {
+void export_csv(dataset* const data) {
+    FILE* f = fopen("out.csv", "w+");
+
+    if(!f)
+        printf("[!] File error\n");
+    else {
+        for(int i=0; i < data->size; i++)
+            fprintf(f, "%d,%d,%d\n", (int) data->points[i].x, (int) data->points[i].y, data->points[i].cstr->id);
+
+        fclose(f);
+        printf("[+] Done.\n");
+    }
+}
+
+void export_svg() {
     printf("[ ] Exporting points from out.csv to out.svg...\n");
 
     FILE* f = fopen("out.csv", "r");
@@ -187,6 +203,8 @@ void free_cluster(cluster* c) {
 
 cluster* initialize_clusters(dataset* const data, int c_nb) {
 
+    printf("[ ] Choosing initial cluster centers...\n");
+
     if(data->size < c_nb) {
         printf("[!] Error: we are looking for more clusters than there are points in the dataset\n");
         return NULL;
@@ -254,7 +272,7 @@ cluster* initialize_clusters(dataset* const data, int c_nb) {
     // putting the ++ in kmeans.
 
     for(int i=0; i<c_nb; i++) {
-        cluster_list[i] = (cluster) {0, NULL, data->points[rand_idx[i]]};
+        cluster_list[i] = (cluster) {0, i, NULL, data->points[rand_idx[i]]};
         cluster_list[i].center.cstr = cluster_list + i;
     }
 
@@ -297,7 +315,7 @@ bool update_clusters(dataset const data, cluster* clusters, int c_nb) {
         for(int j=0; j<data.size; j++) {
 
             if(distance(clusters[i].center, data.points[j]) < distance(data.points[j].cstr->center, data.points[j])) {
-                del_point_from_cluster_llist(data.points[j].cstr->points, data.points + j);
+                // del_point_from_cluster_llist(data.points[j].cstr->points, data.points + j);
                 add_point_to_cluster(data.points + j, clusters + i);
                 modified = true;
             }

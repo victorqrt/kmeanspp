@@ -23,7 +23,7 @@ typedef struct dataset {
 } dataset;
 
 typedef struct cluster {
-    int size;
+    int size, id;
     point_llist* points;
     point center;
 } cluster;
@@ -51,6 +51,7 @@ point cluster_barycenter(cluster c);
 // Misc
 
 char** split(char* const str, const char delimiter);
-void export_csv();
+void export_csv(dataset* const data);
+void export_svg();
 
 #endif

@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
 
             if(c) {
                 cluster_update_loop(*myDataset, c, c_nb);
+
                 printf("[ ] Clusters found, writing to out.csv...\n");
+                export_csv(myDataset);
 
                 free_cluster(c);
             }
@@ -42,7 +44,7 @@ int main(int argc, char** argv) {
             free_dataset(myDataset);
         }
         else if(strcmp(argv[1], "export") == 0)
-            export_csv();
+            export_svg();
         else
             _usage
     }
