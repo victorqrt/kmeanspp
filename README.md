@@ -8,9 +8,10 @@ It is a constant work in progress, as part of my learning process of said langua
 
 # Build tool by language
 
-- C: gcc.
-- Rust: cargo.
-- Scala: sbt.
+- C: gcc
+- Rust: cargo
+- Java: javac, jar
+- Scala: sbt
 
 # Draw dataset
 
