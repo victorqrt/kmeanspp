@@ -1,6 +1,7 @@
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import java.util.stream.*;
 import java.util.Random;
 import java.util.ArrayList;
 import java.lang.Math;
@@ -235,10 +236,10 @@ class Dataset {
 
             candidatePoints.removeAll(toRemove);
 
-            double weightDividor = 0;
-
-            for(Point p : candidatePoints)
-                weightDividor += p.squaredDistanceTo(currentCenter);
+            final Point fCurrentCenter = currentCenter;
+            double weightDividor = candidatePoints.stream()
+                .map(e -> e.squaredDistanceTo(fCurrentCenter))
+                .reduce(0.0, (a, b) -> a + b);
 
             double maxWeight = 0;
             Point bestCandidate = null;
