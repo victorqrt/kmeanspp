@@ -1,6 +1,0 @@
-[package]
-name = "kmeanspp"
-version = "0.1.0"
-authors = ["VictorQrt <vquerette@gmail.com>"]
-
-[dependencies]
